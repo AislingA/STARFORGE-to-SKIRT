@@ -60,7 +60,20 @@
             </MediumSystem>
         </mediumSystem>
         <instrumentSystem type="InstrumentSystem">
-            <InstrumentSystem/>
+            <InstrumentSystem>
+                <defaultWavelengthGrid type="WavelengthGrid">
+                    <ConfigurableBandWavelengthGrid>
+                        <bands type="Band">
+                            <BroadBand bandName="LSST u"/>
+                            <BroadBand bandName="LSST g"/>
+                            <BroadBand bandName="LSST r"/>
+                            <BroadBand bandName="LSST i"/>
+                            <BroadBand bandName="LSST z"/>
+                            <BroadBand bandName="LSST y"/>
+                        </bands>
+                    </ConfigurableBandWavelengthGrid>
+                </defaultWavelengthGrid>
+                <>
         </instrumentSystem>
         <probeSystem type="ProbeSystem">
             <ProbeSystem>
