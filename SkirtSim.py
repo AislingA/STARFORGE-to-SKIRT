@@ -59,9 +59,9 @@ class SkirtSim:
             with h5py.File(self.snapshot, 'r') as f:
                 header = f['Header'].attrs
                 self.snap_head = {
-                    'BoxSize (pc)': header['BoxSize'], # this is not in pc actually but code length based off of yt. itll be pc if we multiply by 1000
-                    'Center (pc)': np.full(3, header['BoxSize'] / 2),
-                    'Cloud Radius (pc)': header['BoxSize'] / 10,
+                    'BoxSize (pc)': header['BoxSize'] * 1000, # this is not in pc actually but code length based off of yt. itll be pc if we multiply by 1000
+                    'Center (pc)': np.full(3, (header['BoxSize'] * 1000) / 2),
+                    'Cloud Radius (pc)': (header['BoxSize'] * 1000) / 10,
                     'Extraction Radius (pc)': r_extract,
                     'Snapshot Time (yr)': header['Time'] * (u.pc / (u.m / u.s)).to('yr')
                 }
@@ -80,9 +80,9 @@ class SkirtSim:
         elif self.sim_type == 'amr':
             ds = yt.load(self.snapshot)
             self.snap_head = {
-                'BoxSize (pc)': 
-                'Center (pc)':
-                'Cloud Radius (pc)': 
+                'BoxSize (pc)': ,
+                'Center (pc)': ,
+                'Cloud Radius (pc)': ,
                 'Extraction Radius (pc)': r_extract,
                 'Snapshot Time (yr)':
             }
