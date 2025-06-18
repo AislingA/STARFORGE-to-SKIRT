@@ -1,9 +1,4 @@
 6/17/25
-- Documentation on github
-    - To-Do list
-    - Definitions
-    - Relevant Equations
-    - Default Units
 - Edit the comments of my functions
     - Don't need "this function does ..."
     - Add in line breaks
