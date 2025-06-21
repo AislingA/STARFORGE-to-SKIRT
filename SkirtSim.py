@@ -8,6 +8,8 @@ import PTS9.visual as vs
 import PTS9.do
 import yt
 
+from SnapUtils import read_snapshot_info
+
 # as of 6/6/25: adding in adaptiveness to the code. 
 
 class SkirtSim:
@@ -41,53 +43,18 @@ class SkirtSim:
 
     def SnapInfo(self):
         '''
-        Extracts information from the snapshot header.
-        
-        Reads header attributes to determine 'BoxSize', used for calculating 'Center' and 'Cloud Radius'.
-        Also extracts snapshot time, coordinates, and other properties for 'PartType5' (sources) and 'PartType0' (gas).
-        
-        Populates the following dictionaries with simulation properties:
-            self.snap_head: Contains header information such as 'BoxSize (pc)', 'Center (pc)',
-                             'Cloud Radius (pc)', 'Extraction Radius (pc)', and 'Snapshot Time (yr)'.
-            self.pt5: Contains data for 'PartType5', including 'Coordinates', 'BH_AccretionLength',
-                       'Star Radius', and 'Luminosity'.
-            self.pt0: Contains data for 'PartType0', including 'Coordinates', 'SmoothingLength',
-                       'Masses', and 'Temperature'.
-        
-        Note: 'r_extract' is defined as 0.10 pc for testing purposes. It is typically set to 0.25 pc.
+        Calls the external function to extract information from the snapshot header.
+
+        This method now delegates the task of reading the snapshot file to
+        the `read_snapshot_info` function from the `SnapUtils` module.
+        It then assigns the returned header, PartType5, and PartType0 data
+        to the corresponding attributes of the SkirtSim instance.
         '''
-        r_extract = 0.10
-        if self.sim_type == 'sph':
-            with h5py.File(self.snapshot, 'r') as f:
-                header = f['Header'].attrs
-                self.snap_head = {
-                    'BoxSize (pc)': header['BoxSize'], # this is not in pc actually but code length based off of yt. itll be pc if we multiply by 1000
-                    'Center (pc)': np.full(3, (header['BoxSize']) / 2),
-                    'Cloud Radius (pc)': (header['BoxSize']) / 10,
-                    'Extraction Radius (pc)': r_extract,
-                    'Snapshot Time (yr)': header['Time'] * (u.pc / (u.m / u.s)).to('yr')
-                }
-                self.pt5 = {
-                    'Coordinates': f['PartType5']['Coordinates'][:],
-                    'BH_AccretionLength': f['PartType5']['BH_AccretionLength'][:],
-                    'Star Radius': f['PartType5']['ProtoStellarRadius_inSolar'][:],
-                    'Luminosity': f['PartType5']['StarLuminosity_Solar'][:]
-                }
-                self.pt0 = {
-                    'Coordinates': f['PartType0']['Coordinates'][:],
-                    'SmoothingLength': f['PartType0']['SmoothingLength'][:],
-                    'Masses': f['PartType0']['Masses'][:],
-                    'Temperature': f['PartType0']['Temperature'][:]
-                }
-      #  elif self.sim_type == 'amr':
-       #     ds = yt.load(self.snapshot)
-        #    self.snap_head = {
-         #       'BoxSize (pc)': ,
-          #      'Center (pc)': ,
-           #     'Cloud Radius (pc)': ,
-            #    'Extraction Radius (pc)': r_extract,
-             #   'Snapshot Time (yr)':
-            #}
+        self.snap_head, self.pt5, self.pt0 = read_snapshot_info(self.snapshot, self.sim_type)
+
+        if not self.snap_head or self.pt5 is None or self.pt0 is None:
+            print("Warning: Failed to load all snapshot information. Some data might be missing or empty.")
+
             
     def computeTemperature(self, luminosity, star_radius):
         '''
