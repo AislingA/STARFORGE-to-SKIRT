@@ -13,17 +13,20 @@ import yt
 class SkirtSim:
     def __init__(self, snapshot, sim_type = 'sph', temp_file = 'template.ski'):
         '''
-        This function initializes what will be needed for the entire class. It takes in two files: the snapshot and the ski template files. 
-            self.snapshot: The snapshot file. The default used for this code is 'snapshot_150.hdf5'. 
-            self.sim_type:
-            self.snap_head: This is an empty dictionary that will eventually hold all the snapshot header data.
-            self.pt5: This will eventually hold all the source data from the snapshot header.
-            self.pt0: This will eventually hold all the gas data from the snapshot header.
-            self.src_data: This is an empty dictionary that will eventually hold the source data extracted from the snapshot file, specifically from pt5.
-            self.src_skirt: This is an empty list that will eventually hold the source data and will be formatted for SKIRT input.
-            self.gas_data: This is an empty dictionary that will eventually hold the gas data extracted from the snapshot file, specifically from pt0.
-            self.gas_skirt: This is an empty list that will eventually hold the gas data and will be formatted for SKIRT input.
-            self.skitemp: The ski template file. We use the template ski file that was created for this project. 
+        Takes two file paths:
+            snapshot: Path to the snapshot file. Default: 'snapshot_150.hdf5'.
+            temp_file: Path to the ski template file for this project.
+
+        Takes in a sim_type. Options are 'sph' and 'amr'.
+        
+        Attributes:
+            self.snap_head: Dictionary to store snapshot header data.
+            self.pt5: Stores source data from the snapshot header.
+            self.pt0: Stores gas data from the snapshot header.
+            self.src_data: Dictionary to store source data extracted from pt5.
+            self.src_skirt: List to store source data formatted for SKIRT input.
+            self.gas_data: Dictionary to store gas data extracted from pt0.
+            self.gas_skirt: List to store gas data formatted for SKIRT input.
         '''
         self.snapshot = snapshot
         self.sim_type = sim_type
@@ -38,21 +41,20 @@ class SkirtSim:
 
     def SnapInfo(self):
         '''
-        This function extracts the information from the snapshot header. It reads in the header attributes to get the boxsize which is used to calculate the center and the cloud radius. It also extracts the snapshot time, the coordinates, and other properties for the sources (PartType5) and the gas (PartType0). 
-
-        The initialized dictionaries (self.snap_head, self.pt5, self.pt0) are populated to contain all the necessary properties for the simulation run:
-            self.snap_head: A dictionary containing header information such as
-                           'BoxSize (pc)', 'Center (pc)', 'Cloud Radius (pc)',
-                           'Extraction Radius (pc)', and 'Snapshot Time (yr)'.
-                           
-            self.pt5: A dictionary containing data for PartType5, including
-                      'Coordinates', 'BH_AccretionLength', 'Star Radius', and
-                      'Luminosity'.
-                      
-            self.pt0: A dictionary containing data for PartType0, including
-                      'Coordinates', 'SmoothingLength', 'Masses', and 'Temperature'.            
-
-        Here we define r_extract to be 0.10 pc. ** Usually, this would be set to 0.25 pc, but we are currently using a smaller set of data for testing. **
+        Extracts information from the snapshot header.
+        
+        Reads header attributes to determine 'BoxSize', used for calculating 'Center' and 'Cloud Radius'.
+        Also extracts snapshot time, coordinates, and other properties for 'PartType5' (sources) and 'PartType0' (gas).
+        
+        Populates the following dictionaries with simulation properties:
+            self.snap_head: Contains header information such as 'BoxSize (pc)', 'Center (pc)',
+                             'Cloud Radius (pc)', 'Extraction Radius (pc)', and 'Snapshot Time (yr)'.
+            self.pt5: Contains data for 'PartType5', including 'Coordinates', 'BH_AccretionLength',
+                       'Star Radius', and 'Luminosity'.
+            self.pt0: Contains data for 'PartType0', including 'Coordinates', 'SmoothingLength',
+                       'Masses', and 'Temperature'.
+        
+        Note: 'r_extract' is defined as 0.10 pc for testing purposes. It is typically set to 0.25 pc.
         '''
         r_extract = 0.10
         if self.sim_type == 'sph':
@@ -89,16 +91,20 @@ class SkirtSim:
             
     def computeTemperature(self, luminosity, star_radius):
         '''
-        This function computes the surface temperature using the luminosity and the radius of the star and the Stefan-Boltzmann law. This function is used to get the temperature for the source file.
-        
-        The Stefan-Boltzmann constant used in the calculation is sigma = 5.670374419e-5. The returned temperature will be in Kelvin. 
+        Computes the surface temperature of a star using its luminosity, radius, and the Stefan-Boltzmann Law.
+        The Stefan-Boltzmann constant (sigma) used is 5.670374419e-5.
+        Returns temperature in Kelvin.
         '''
         sigma = 5.670374419e-5 
         return (luminosity / (4 * np.pi * star_radius**2 * sigma))**0.25
 
     def SrcFile(self):
         '''
-        This function processes the source (PartType5) data from the snapshot, computes the temperature for each source, formats the data for SKIRT, and saves it to a text file. The temperature is calculated by taking the luminosity and star radius from 'self.pt5' and using the 'computeTemperature' function. The dictionary 'self.src_data' is then filled with the coordinates, the smoothing length, the radius, and the temperature. The dictionary is then formatted into a numpy array 'self.src_skirt' as this is better for SKIRT input. The file is then saved as an .hdf5 file with a custom header. 
+        Processes 'PartType5' (source) data from the snapshot.
+        Calculates the temperature for each source using luminosity and star radius from 'self.pt5' and the 'computeTemperature' function.
+        Populates 'self.src_data' with coordinates, smoothing length, radius, and temperature.
+        Formats this data into a NumPy array 'self.src_skirt' for SKIRT input.
+        Saves the processed data to an .hdf5 file with a custom header.
         '''
         pt5 = self.pt5
         luminosity = pt5['Luminosity']
@@ -134,11 +140,17 @@ class SkirtSim:
 
     def GasFile(self):
         '''
-        This function processes the gas (PartType0) data from the snapshot, applies the radial cut (which is from the 'extraction radius'), formats the data for SKIRT, and save it to a text file. 
-
-        Before applying the radial cut, we center the coordinates by subtracting off the snapshot center and calculate the radial distance of each particle from the center. Then we apply the cut to only keep particles within the extration radius. 
-
-        The dictionary 'self.gas_data' is then filled with the coordinates, smoothing length, masses, and temperatures. The dictionary is then formatted into a numpy array 'self.gas_skirt' as this is better for SKIRT input. The file is then saved as an .hdf5 file with a custom header. 
+        Processes 'PartType0' (gas) data from the snapshot.
+        Applies a radial cut based on the 'extraction radius' to filter particles.
+        
+        Before applying the cut:
+            Centers coordinates by subtracting the snapshot center.
+            Calculates the radial distance of each particle from the center.
+            Keeps only particles within the extraction radius.
+        
+        Populates 'self.gas_data' with coordinates, smoothing length, masses, and temperatures.
+        Formats this data into a NumPy array 'self.gas_skirt' for SKIRT input.
+        Saves the processed data to an .hdf5 file with a custom header.
         '''
         pt0 = self.pt0
 
@@ -203,13 +215,14 @@ class SkirtSim:
 
     def SkiFile(self, gasFile, srcFile):
         '''
-        This function generates the SKIRT configuration file (`.ski`) by changing the template file with simulation parameters and data filenames.
-
-        Args listed:
-            gasFile: The filename of the processed gas data to be used in the SKIRT configuration.
-            srcFile: The filename of the processed source data to be used in the SKIRT configuration.
-
-        This function reads in the template ski file and replaces any placeholders. For example, 'stars.txt' is replaced with the actual source data file. Another example is the min and max values of the axes are replaced with the actual box dimensions. After all the replacements, the new ski file is written.
+        Generates the SKIRT configuration file (.ski) by updating a template file with simulation parameters and data filenames.
+        
+        Args:
+            gasFile (str): Filename of the processed gas data for SKIRT configuration.
+            srcFile (str): Filename of the processed source data for SKIRT configuration.
+        
+        Reads the template .ski file and replaces placeholders.
+        The updated .ski file is then written.
         '''
         header = self.snap_head
         boxsize = header['BoxSize (pc)']
@@ -241,19 +254,21 @@ class SkirtSim:
 
     def SimRun(self):
         '''
-        This function does the entire SKIRT simulation process. It calls the methods to read snapshot information, create gas and source files, generate the ski file, and execute the SKIRT simulation. This function also includes a timing method to see how long the simulation takes to fully run. 
-
-        The following steps are done in the function:
-        1. Attempt to open and read the snapshot file using `self.SnapInfo()`.
-        2. Create the SKIRT-formatted source file using `self.SrcFile()`.
-        3. Create the SKIRT-formatted gas file using `self.GasFile()`.
-        4. Generate the ski file using `self.SkiFile()`, using the paths of the gas and source files.
-        5. Execute the SKIRT simulation using the ski file.
-
-        This function returns:
-            - gas_data: The processed gas data dictionary
-            - src_data: The processed source data dictionary
-            - sim: The SKIRT simulation result
+        Manages the entire SKIRT simulation process.
+        Calls methods to read snapshot information, create gas and source data files, generate the .ski configuration file, and execute the SKIRT simulation.
+        Includes a timing method to measure total simulation runtime.
+        
+        Steps:
+            1. Attempts to open and read the snapshot file using `self.SnapInfo()`.
+            2. Creates the SKIRT-formatted source file using `self.SrcFile()`.
+            3. Creates the SKIRT-formatted gas file using `self.GasFile()`.
+            4. Generates the .ski file using `self.SkiFile()`, providing paths for the gas and source files.
+            5. Executes the SKIRT simulation using the generated .ski file.
+        
+        Returns:
+            gas_data (dict): The processed gas data dictionary.
+            src_data (dict): The processed source data dictionary.
+            sim: The SKIRT simulation result.
         '''
         start_time = time.time() #start timing
         print('Starting timing for simulation.')
