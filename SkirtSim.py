@@ -53,7 +53,7 @@ class SkirtSim:
         self.snap_head, self.pt5, self.pt0 = read_snapshot_info(self.snapshot, self.sim_type)
 
         if not self.snap_head or self.pt5 is None or self.pt0 is None:
-            print("Warning: Failed to load all snapshot information. Some data might be missing or empty.")
+            print("Warning: Failed to load all snapshot information.")
 
             
     def computeTemperature(self, luminosity, star_radius):
