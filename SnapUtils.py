@@ -24,7 +24,7 @@ def read_snapshot_info(snapshot_path, sim_type='sph'):
 
     Note: 'r_extract' is defined as 0.10 pc for testing purposes. It is typically set to 0.25 pc.
     """
-    r_extract = 0.10 # Extraction radius in pc
+    r_extract = 0.25 # Extraction radius in pc
     snap_head = {}
     pt5 = None
     pt0 = None
