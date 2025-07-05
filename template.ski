@@ -9,7 +9,7 @@
             <StellarUnits wavelengthOutputStyle="Wavelength" fluxOutputStyle="Frequency"/>
         </units>
         <sourceSystem type="SourceSystem">
-            <SourceSystem minWavelength="0.09 micron" maxWavelength="100 micron" wavelengths="0.55 micron" sourceBias="0.5">
+            <SourceSystem minWavelength="0.1 micron" maxWavelength="5 micron" wavelengths="0.55 micron" sourceBias="0.5">
                 <sources type="Source">
                     <ParticleSource filename="stars.txt" importVelocity="false" importVelocityDispersion="false" importCurrentMass="false" useColumns="" sourceWeight="1" wavelengthBias="0.5">
                         <smoothingKernel type="SmoothingKernel">
@@ -33,7 +33,7 @@
                 <radiationFieldOptions type="RadiationFieldOptions">
                     <RadiationFieldOptions storeRadiationField="true">
                         <radiationFieldWLG type="DisjointWavelengthGrid">
-                            <LogWavelengthGrid minWavelength="0.1 micron" maxWavelength="100 micron" numWavelengths="100"/>
+                            <LogWavelengthGrid minWavelength="0.1 micron" maxWavelength="5 micron" numWavelengths="100"/>
                         </radiationFieldWLG>
                     </RadiationFieldOptions>
                 </radiationFieldOptions>
@@ -73,18 +73,18 @@
                         </bands>
                     </ConfigurableBandWavelengthGrid>
                 </defaultWavelengthGrid>
-            <instruments type="Instrument">
-              <FullInstrument instrumentName="O1" distance="1 kpc" inclination="90 deg" azimuth="0 deg" roll="0 deg" fieldOfViewX="160 kpc" numPixelsX="800" centerX="0 pc" fieldOfViewY="160 kpc" numPixelsY="800" centerY="0 pc" recordComponents="false" numScatteringLevels="0" recordPolarization="false" recordStatistics="false">
-                        </FullInstrument>
-            </instruments>
-          </InstrumentSystem>
+                <instruments type="Instrument">
+                    <FullInstrument instrumentName="O1" distance="1 kpc" inclination="90 deg" azimuth="0 deg" roll="0 deg" fieldOfViewX="160 kpc" numPixelsX="800" centerX="0 pc" fieldOfViewY="160 kpc" numPixelsY="800" centerY="0 pc" recordComponents="false" numScatteringLevels="0" recordPolarization="false" recordStatistics="false">
+                    </FullInstrument>
+                </instruments>
+            </InstrumentSystem>
         </instrumentSystem>
         <probeSystem type="ProbeSystem">
             <ProbeSystem>
                 <probes type="Probe">
-                    <DensityProbe probeName="O1" probeAfter="Setup">
+                    <DensityProbe probeName="O1" probeAfter="Run">
                     </DensityProbe>
-                    <TemperatureProbe probeName="temp" probeAfter="Setup">
+                    <TemperatureProbe probeName="temp" probeAfter="Run">
                     </TemperatureProbe>
                 </probes>
             </ProbeSystem>
