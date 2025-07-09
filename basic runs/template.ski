@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- A SKIRT parameter file © Astronomical Observatory, Ghent University -->
+<skirt-simulation-hierarchy type="MonteCarloSimulation" format="9">
+<!-- -------------- -->
+<!-- SIMULATIONMODE -->
+<!-- -------------- -->
+    <MonteCarloSimulation userLevel="Expert" simulationMode="DustEmission" iteratePrimaryEmission="false" iterateSecondaryEmission="false" numPackets="1e6">
+        <random type="Random">
+            <Random seed="0"/>
+        </random>
+        <units type="Units">
+            <StellarUnits wavelengthOutputStyle="Wavelength" fluxOutputStyle="Frequency"/>
+        </units>
+<!-- ------ -->
+<!-- SOURCE -->
+<!-- ------ -->
+        <sourceSystem type="SourceSystem">
+            <SourceSystem minWavelength="0.05 micron" maxWavelength="5 micron" wavelengths="0.55 micron" sourceBias="0.5">
+                <sources type="Source">
+                    <ParticleSource filename="stars.txt" importVelocity="false" importVelocityDispersion="false" importCurrentMass="false" useColumns="" sourceWeight="1" wavelengthBias="0.5">
+                        <smoothingKernel type="SmoothingKernel">
+                            <UniformSmoothingKernel/>
+                        </smoothingKernel>
+                        <sedFamily type="SEDFamily">
+                            <BlackBodySEDFamily/>
+                        </sedFamily>
+                        <wavelengthBiasDistribution type="WavelengthDistribution">
+                            <DefaultWavelengthDistribution/>
+                        </wavelengthBiasDistribution>
+                    </ParticleSource>
+                </sources>
+            </SourceSystem>
+        </sourceSystem>
+<!-- ------ -->
+<!-- MEDIUM -->
+<!-- ------ -->
+        <mediumSystem type="MediumSystem">
+            <MediumSystem>
+                <photonPacketOptions type="PhotonPacketOptions">
+                    <PhotonPacketOptions forceScattering="true" minWeightReduction="1e4" minScattEvents="0" pathLengthBias="0.5"/>
+                </photonPacketOptions>
+<!-- -------------- -->
+<!-- RADIATIONFIELD -->
+<!-- -------------- -->
+                <radiationFieldOptions type="RadiationFieldOptions">
+                    <RadiationFieldOptions storeRadiationField="true">
+                        <radiationFieldWLG type="DisjointWavelengthGrid">
+                            <LogWavelengthGrid minWavelength="0.05 micron" maxWavelength="5 micron" numWavelengths="100"/>
+                        </radiationFieldWLG>
+                    </RadiationFieldOptions>
+                </radiationFieldOptions>
+<!-- ------------------- -->
+<!-- DUSTEMISSIONOPTIONS -->
+<!-- ------------------- -->
+                <dustEmissionOptions type="DustEmissionOptions">
+                    <DustEmissionOptions dustEmissionType="Equilibrium" includeHeatingByCMB="false" sourceWeight="1" wavelengthBias="0.5">
+                        <cellLibrary type="SpatialCellLibrary">
+                            <AllCellsLibrary/>
+                        </cellLibrary>
+                        <dustEmissionWLG type="DisjointWavelengthGrid">
+                            <LogWavelengthGrid minWavelength="0.05 micron" maxWavelength="5 micron" numWavelengths="100"/>
+                        </dustEmissionWLG>
+                        <wavelengthBiasDistribution type="WavelengthDistribution">
+                            <DefaultWavelengthDistribution/>
+                        </wavelengthBiasDistribution>
+                    </DustEmissionOptions>
+                </dustEmissionOptions>
+<!-- -------------- -->
+<!-- PARTICLEMEDIUM -->
+<!-- -------------- -->
+                <media type="Medium">
+                    <ParticleMedium filename="gas.txt" massType="Mass" massFraction="1" importMetallicity="false" importTemperature="true" maxTemperature="10000 K" importVelocity="false" importMagneticField="false" importVariableMixParams="false" useColumns="">
+                        <smoothingKernel type="SmoothingKernel">
+                            <UniformSmoothingKernel/>
+                        </smoothingKernel>
+                        <materialMix type="MaterialMix">
+                            <ThemisDustMix numSilicateSizes="5" numHydrocarbonSizes="5"/>
+                        </materialMix>
+                    </ParticleMedium>
+                </media>
+                <samplingOptions type="SamplingOptions">
+                    <SamplingOptions numDensitySamples="100" numPropertySamples="1" aggregateVelocity="Average"/>
+                </samplingOptions>
+                <grid type="SpatialGrid">
+                    <PolicyTreeSpatialGrid minX="-Xmax pc" maxX="Xmax pc" minY="-Ymax pc" maxY="Ymax pc" minZ="-Zmax pc" maxZ="Zmax pc" treeType="OctTree">
+                        <policy type="TreePolicy">
+                            <DensityTreePolicy minLevel="6" maxLevel="12" maxDustFraction="1e-6" maxDustOpticalDepth="0" wavelength="0.55 micron" maxDustDensityDispersion="0" maxElectronFraction="1e-6" maxGasFraction="1e-6"/>
+                        </policy>
+                    </PolicyTreeSpatialGrid>
+                </grid>
+            </MediumSystem>
+        </mediumSystem>
+<!-- ---------- -->
+<!-- INSTRUMENT -->
+<!-- ---------- -->
+        <instrumentSystem type="InstrumentSystem">
+            <InstrumentSystem>
+                <defaultWavelengthGrid type="WavelengthGrid">
+                    <ConfigurableBandWavelengthGrid>
+                        <bands type="Band">
+                            <BroadBand bandName="LSST u"/>
+                            <BroadBand bandName="LSST g"/>
+                            <BroadBand bandName="LSST r"/>
+                            <BroadBand bandName="LSST i"/>
+                            <BroadBand bandName="LSST z"/>
+                            <BroadBand bandName="LSST y"/>
+                        </bands>
+                    </ConfigurableBandWavelengthGrid>
+                </defaultWavelengthGrid>
+                <instruments type="Instrument">
+                    <FullInstrument instrumentName="O1" distance="1 kpc" inclination="90 deg" azimuth="0 deg" roll="0 deg" fieldOfViewX="10 pc" numPixelsX="800" centerX="0 pc" fieldOfViewY="10 pc" numPixelsY="800" centerY="0 pc" recordComponents="True" numScatteringLevels="0" recordPolarization="false" recordStatistics="false">
+                    </FullInstrument>
+                </instruments>
+            </InstrumentSystem>
+        </instrumentSystem>
+        <probeSystem type="ProbeSystem">
+            <ProbeSystem>
+                <probes type="Probe">
+                    <DensityProbe probeName="densprobe" probeAfter="Run">
+                    </DensityProbe>
+                    <TemperatureProbe probeName="tempprobe" probeAfter="Run">
+                    </TemperatureProbe>
+                </probes>
+            </ProbeSystem>
+        </probeSystem>
+    </MonteCarloSimulation>
+</skirt-simulation-hierarchy>
